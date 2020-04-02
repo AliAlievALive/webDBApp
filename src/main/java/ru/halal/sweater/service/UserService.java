@@ -1,6 +1,8 @@
 package ru.halal.sweater.service;
 
-
+import ru.halal.sweater.domain.Role;
+import ru.halal.sweater.domain.User;
+import ru.halal.sweater.repos.UserRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -8,9 +10,6 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
-import ru.halal.sweater.domain.Role;
-import ru.halal.sweater.domain.User;
-import ru.halal.sweater.repos.UserRepo;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -34,7 +33,7 @@ public class UserService implements UserDetailsService {
             throw new UsernameNotFoundException("User not found");
         }
 
-        return userRepo.findByUsername(username);
+        return user;
     }
 
     public boolean addUser(User user) {
@@ -43,6 +42,7 @@ public class UserService implements UserDetailsService {
         if (userFromDb != null) {
             return false;
         }
+
         user.setActive(true);
         user.setRoles(Collections.singleton(Role.USER));
         user.setActivationCode(UUID.randomUUID().toString());
@@ -59,7 +59,7 @@ public class UserService implements UserDetailsService {
         if (!StringUtils.isEmpty(user.getEmail())) {
             String message = String.format(
                     "Hello, %s! \n" +
-                            "Welcome to Halal-Product! Please, visit next link: http://localhost:8080/activate/%s",
+                            "Welcome to Sweater. Please, visit next link: http://localhost:8080/activate/%s",
                     user.getUsername(),
                     user.getActivationCode()
             );
@@ -100,6 +100,7 @@ public class UserService implements UserDetailsService {
                 user.getRoles().add(Role.valueOf(key));
             }
         }
+
         userRepo.save(user);
     }
 
@@ -112,7 +113,7 @@ public class UserService implements UserDetailsService {
         if (isEmailChanged) {
             user.setEmail(email);
 
-            if (StringUtils.isEmpty(email)) {
+            if (!StringUtils.isEmpty(email)) {
                 user.setActivationCode(UUID.randomUUID().toString());
             }
         }

@@ -39,7 +39,8 @@ public class MainController {
 
     @GetMapping("/main")
     public String main(@RequestParam(required = false, defaultValue = "") String filter, Model model) {
-        Iterable<Message> messages;
+        Iterable<Message> messages = messageRepo.findAll();
+
         if (filter != null && !filter.isEmpty()) {
             messages = messageRepo.findByTag(filter);
         } else {
@@ -64,10 +65,11 @@ public class MainController {
 
         if (bindingResult.hasErrors()) {
             Map<String, String> errorsMap = ControllerUtils.getErrors(bindingResult);
+
             model.mergeAttributes(errorsMap);
             model.addAttribute("message", message);
         } else {
-            if (file != null && !Objects.requireNonNull(file.getOriginalFilename()).isEmpty()) {
+            if (file != null && !file.getOriginalFilename().isEmpty()) {
                 File uploadDir = new File(uploadPath);
 
                 if (!uploadDir.exists()) {
@@ -83,10 +85,14 @@ public class MainController {
             }
 
             model.addAttribute("message", null);
+
             messageRepo.save(message);
         }
+
         Iterable<Message> messages = messageRepo.findAll();
+
         model.addAttribute("messages", messages);
+
         return "main";
     }
 }
