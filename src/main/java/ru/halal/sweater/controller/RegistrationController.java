@@ -38,11 +38,12 @@ public class RegistrationController {
             model.addAttribute("passwordError", "Password confirmation cannot be empty");
         }
 
-        if (user.getPassword() != null && !user.getPassword().equals(passwordConfirm)) {
+        boolean isPasswordDifferent = user.getPassword() != null && !user.getPassword().equals(passwordConfirm);
+        if (isPasswordDifferent) {
             model.addAttribute("passwordError", "Password are different!");
         }
 
-        if (isConfirmEmpty || bindingResult.hasErrors()) {
+        if (isConfirmEmpty || isPasswordDifferent || bindingResult.hasErrors()) {
             Map<String, String> errors = ControllerUtils.getErrors(bindingResult);
 
             model.mergeAttributes(errors);
@@ -64,8 +65,10 @@ public class RegistrationController {
         boolean isActivated = userService.activateUser(code);
 
         if (isActivated) {
+            model.addAttribute("messageType", "success");
             model.addAttribute("message", "User successfully activated");
         } else {
+            model.addAttribute("messageType", "danger");
             model.addAttribute("message", "Activation code is not found!");
         }
         return "login";
